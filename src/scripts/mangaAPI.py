@@ -1,7 +1,7 @@
 from datetime import datetime
-import manganelo
+import manganelo  # type: ignore
 from typing import List, Union
-from models.manga import Manga
+from src.models.manga import Manga
 
 
 class MangaManager:
@@ -14,30 +14,30 @@ class MangaManager:
             if not results:
                 return "No results found."
 
-            mangas = []
-            for i, result in enumerate(results):
-                manga = Manga(
-                    id=i,
-                    name=result.title,
-                    views=result.views,
-                    authors=", ".join(result.authors) if result.authors else "Unknown",
-                    rating=result.rating if result.rating else 0.0,
-                    url=result.url,
-                    last_chapter=(
-                        result.chapter_list[-1].url
-                        if result.chapter_list
-                        else "No chapters"
-                    ),
-                    # Convert last_chapter_release_date to a date object if it's a datetime
-                    last_chapter_release_date=(
-                        result.chapter_list[-1].uploaded.date()
-                        if isinstance(result.chapter_list[-1].uploaded, datetime)
-                        else result.chapter_list[-1].uploaded
-                    ),
-                )
-                mangas.append(manga)
+            # Get the first result only
+            result = results[0]
+            manga = Manga(
+                name=result.title,
+                views=result.views,
+                authors=", ".join(result.authors) if result.authors else "Unknown",
+                rating=result.rating if result.rating else 0.0,
+                url=result.url,
+                last_chapter=(
+                    result.chapter_list[-1].url
+                    if result.chapter_list
+                    else "No chapters"
+                ),
+                # Convert last_chapter_release_date to a date object if it's a datetime
+                last_chapter_release_date=(
+                    result.chapter_list[-1].uploaded
+                    if isinstance(result.chapter_list[-1].uploaded, datetime)
+                    else datetime.strptime(
+                        result.chapter_list[-1].uploaded, "%Y-%m-%d"
+                    )
+                ),
+            )
 
-            return mangas
+            return manga
         except (IndexError, TypeError, AttributeError) as e:
             # Handle cases where the result or its fields are not as expected
             return f"Error retrieving data: {e}"
