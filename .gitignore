@@ -1,0 +1,28 @@
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment directories
+venv/
+ENV/
+env/
+.venv/
+
+# Ignore other virtual environment-specific files
+*.env
+*.venv
+pip-log.txt
+
+# Ignore IDE/editor specific files
+.vscode/
+
+# Ignore logs
+*.log
+
+# Ignore database files (if applicable)
+*.sqlite3
+*.db
+
+# Ignore coverage reports
+.coverage
+htmlcov/
