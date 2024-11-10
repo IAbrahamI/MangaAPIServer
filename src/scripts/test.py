@@ -1,20 +1,18 @@
-import manganelo
-
-home_page = manganelo.get_home_page()
-results = manganelo.get_search_results("Path of the Shaman")
+"""from src.scripts.database_manager import DatabaseManager
+from src.scripts.mangaAPI import MangaManager
 
 
-for title in results:
-    print(title.title, title.views)
+manga_manager = MangaManager()
+manga = manga_manager.get_manga("Reincarnated In A Cursed Game")
 
-    chapters = title.chapter_list
+#with DatabaseManager() as db_manager:
+#    db_manager.store_manga_data(manga)
+
+with DatabaseManager() as db_manager:
+    print(db_manager.get_all())"""
     
-    #icon_path = title.download_icon("./icon.png")
-    print(title.icon_url)
-    #chapter_path = chapters[-1].download(f"./Chapter {chapters[-1].chapter}.pdf")
-    #print(f"./Chapter {chapters[-1].chapter}.pdf")
+from src.scripts.service_handler import ServiceHandler
 
-    """for c in chapters:
-        print(f"#{c.chapter} | {c.title}")
-        print(print(c.download(f"./Chapter {c.chapter}.pdf")))"""
-        #chapter_path = c.download(f"./Chapter {c.chapter}.pdf")
+s_handler = ServiceHandler()
+
+print(s_handler.get_all_entries())
