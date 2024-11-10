@@ -27,14 +27,12 @@ class MangaManager:
                     if result.chapter_list
                     else "No chapters"
                 ),
-                # Convert last_chapter_release_date to a date object if it's a datetime
+                # Convert last_chapter_release_date to a date object with specific format if it's a datetime
                 last_chapter_release_date=(
-                    result.chapter_list[-1].uploaded
+                    result.chapter_list[-1].uploaded.strftime("%Y-%m-%d %H:%M:%S")
                     if isinstance(result.chapter_list[-1].uploaded, datetime)
-                    else datetime.strptime(
-                        result.chapter_list[-1].uploaded, "%Y-%m-%d"
-                    )
-                ),
+                    else datetime.strptime(result.chapter_list[-1].uploaded, "%Y-%m-%d").strftime("%Y-%m-%d %H:%M:%S")
+                )
             )
 
             return manga
@@ -43,7 +41,7 @@ class MangaManager:
             return f"Error retrieving data: {e}"
 
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     m = MangaManager()
     result = m.get_manga("My Disciples Are All Big Villains")
-    print(result)
+    print(result)"""

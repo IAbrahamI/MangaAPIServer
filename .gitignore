@@ -26,3 +26,6 @@ pip-log.txt
 # Ignore coverage reports
 .coverage
 htmlcov/
+
+# Ignore test files
+*test*
