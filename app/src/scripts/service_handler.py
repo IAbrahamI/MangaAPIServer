@@ -25,3 +25,7 @@ class ServiceHandler:
             mangas = db_manager.get_all()
             return mangas
         
+    # To be defined
+    def update_all_entries(self):
+        pass
+            
