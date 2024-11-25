@@ -25,7 +25,22 @@ class ServiceHandler:
             mangas = db_manager.get_all()
             return mangas
         
+    def remove_manga(self, manga_name: str):
+        with DatabaseManager() as db_manager:
+            db_manager.remove_manga_data(manga_name)
+            return "Manga removed successfully"
+        
     # To be defined
     def update_all_entries(self):
-        pass
-            
+        results = []
+        with DatabaseManager() as db_manager:
+            mangas = db_manager.get_all()
+            for manga in mangas:
+                manga_fetched = self.manga_manager.get_manga(manga[2])
+                if isinstance(manga_fetched, Manga):
+                    result = db_manager.store_manga_data(manga_fetched)
+                    results.append(result)
+                else:
+                    results.append(f"No results found for {manga[2]}.")
+        return results
+        
