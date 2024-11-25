@@ -37,7 +37,11 @@ async def get_manga(manga_name: str):
 async def add_manga(manga_name: str):
     return service_handler.create_entry(manga_name)
 
+@app.delete("/mangas/{manga_name}")
+async def remove_manga(manga_name: str):
+    return service_handler.remove_manga(manga_name)
+
 # To be defined
 @app.put("/mangas")
-def update_mangas():
-    pass
+async def update_mangas():
+    return service_handler.update_all_entries()

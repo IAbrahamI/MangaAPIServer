@@ -2,7 +2,6 @@ from datetime import datetime
 import sqlite3
 import os
 from typing import List
-from src.scripts.mangaAPI import MangaManager
 from src.models.manga import Manga
 
 
@@ -66,15 +65,18 @@ class DatabaseManager:
     def _initialize_tables(self):
         self.cursor.execute(
             """CREATE TABLE IF NOT EXISTS mangas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Use AUTOINCREMENT for automatic ID generation
-                name TEXT NOT NULL,
-                views INT DEFAULT 0,
-                authors TEXT,
-                rating REAL,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 url TEXT NOT NULL,
-                last_chapter TEXT,
-                last_chapter_release_date DATETIME, 
-                last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
+                name TEXT NOT NULL,
+                authors TEXT NOT NULL,
+                status TEXT NOT NULL,
+                genres TEXT NOT NULL,  -- List of strings, will store as comma-separated values
+                views TEXT NOT NULL,
+                rating REAL NOT NULL,
+                description TEXT NOT NULL,
+                last_chapter TEXT NOT NULL,
+                last_chapter_url TEXT NOT NULL,
+                last_chapter_release_date TEXT NOT NULL
             )"""
         )
         self.conn.commit()
@@ -86,23 +88,54 @@ class DatabaseManager:
 
     def store_manga_data(self, manga: Manga):
         if not self._manga_exists(manga.name):
+            # Convert genres list to a comma-separated string
+            genres_str = ', '.join(manga.genres)
             self.cursor.execute(
-                """INSERT OR REPLACE INTO mangas (name, views, authors, rating, url, last_chapter, 
-                last_chapter_release_date) VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    manga.name,
-                    manga.views,
-                    manga.authors,
-                    manga.rating,
+                '''INSERT INTO mangas (url, name, authors, status, genres, views, rating, description, last_chapter, last_chapter_url, last_chapter_release_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
                     manga.url,
+                    manga.name,
+                    manga.authors,
+                    manga.status,
+                    genres_str,
+                    manga.views,
+                    manga.rating,
+                    manga.description,
                     manga.last_chapter,
-                    manga.last_chapter_release_date,
-                ),
-            )
+                    manga.last_chapter_url,
+                    manga.last_chapter_release_date
+            ))
             self.conn.commit()
             return f"Manga: {manga.name} stored successfully."
         else:
-            return f"Manga: {manga.name} already exists"
+            # If manga exists, update the existing record
+            genres_str = ', '.join(manga.genres)  # Convert genres list to a comma-separated string
+            self.cursor.execute(
+                '''UPDATE mangas 
+                SET authors = ?, 
+                    status = ?, 
+                    genres = ?, 
+                    views = ?, 
+                    rating = ?, 
+                    description = ?, 
+                    last_chapter = ?, 
+                    last_chapter_url = ?, 
+                    last_chapter_release_date = ?
+                WHERE name = ?''', 
+                (manga.authors,
+                manga.status,
+                genres_str,
+                manga.views,
+                manga.rating,
+                manga.description,
+                manga.last_chapter,
+                manga.last_chapter_url,
+                manga.last_chapter_release_date,
+                manga.name)  # Use the unique identifier (e.g., name or URL)
+            )
+            self.conn.commit()
+            return f"Manga: {manga.name} updated successfully."
 
     def remove_manga_data(self, manga_name: str):
         if self._manga_exists(manga_name):

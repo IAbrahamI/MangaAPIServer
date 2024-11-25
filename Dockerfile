@@ -5,7 +5,7 @@ FROM python:3.13.0
 WORKDIR /app
 
 # Copy project files into the container
-COPY ./app /app
+COPY . /app
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
