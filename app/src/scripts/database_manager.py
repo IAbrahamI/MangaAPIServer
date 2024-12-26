@@ -2,7 +2,7 @@ from datetime import datetime
 import sqlite3
 import os
 from typing import List
-from src.models.manga import Manga
+from app.src.models.manga import Manga
 
 
 # Define a date adapter and converter
@@ -68,6 +68,7 @@ class DatabaseManager:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 url TEXT NOT NULL,
                 name TEXT NOT NULL,
+                image_link TEXT NOT NULL,
                 authors TEXT NOT NULL,
                 status TEXT NOT NULL,
                 genres TEXT NOT NULL,  -- List of strings, will store as comma-separated values
@@ -87,15 +88,20 @@ class DatabaseManager:
         return count > 0  # Returns True if the manga exists
 
     def store_manga_data(self, manga: Manga):
+        """Insert or update manga data in the database, now including `image_link`."""
         if not self._manga_exists(manga.name):
             # Convert genres list to a comma-separated string
             genres_str = ', '.join(manga.genres)
             self.cursor.execute(
-                '''INSERT INTO mangas (url, name, authors, status, genres, views, rating, description, last_chapter, last_chapter_url, last_chapter_release_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
+                '''INSERT INTO mangas (
+                    url, name, image_link, authors, status, genres, views, rating, 
+                    description, last_chapter, last_chapter_url, 
+                    last_chapter_release_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (
                     manga.url,
                     manga.name,
+                    manga.image_link,
                     manga.authors,
                     manga.status,
                     genres_str,
@@ -105,7 +111,8 @@ class DatabaseManager:
                     manga.last_chapter,
                     manga.last_chapter_url,
                     manga.last_chapter_release_date
-            ))
+                )
+            )
             self.conn.commit()
             return f"Manga: {manga.name} stored successfully."
         else:
@@ -113,7 +120,8 @@ class DatabaseManager:
             genres_str = ', '.join(manga.genres)  # Convert genres list to a comma-separated string
             self.cursor.execute(
                 '''UPDATE mangas 
-                SET authors = ?, 
+                SET image_link = ?,
+                    authors = ?, 
                     status = ?, 
                     genres = ?, 
                     views = ?, 
@@ -123,16 +131,19 @@ class DatabaseManager:
                     last_chapter_url = ?, 
                     last_chapter_release_date = ?
                 WHERE name = ?''', 
-                (manga.authors,
-                manga.status,
-                genres_str,
-                manga.views,
-                manga.rating,
-                manga.description,
-                manga.last_chapter,
-                manga.last_chapter_url,
-                manga.last_chapter_release_date,
-                manga.name)  # Use the unique identifier (e.g., name or URL)
+                (
+                    manga.image_link,
+                    manga.authors,
+                    manga.status,
+                    genres_str,
+                    manga.views,
+                    manga.rating,
+                    manga.description,
+                    manga.last_chapter,
+                    manga.last_chapter_url,
+                    manga.last_chapter_release_date,
+                    manga.name  # Use the unique identifier (e.g., name or URL)
+                )
             )
             self.conn.commit()
             return f"Manga: {manga.name} updated successfully."

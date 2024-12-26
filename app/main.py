@@ -1,9 +1,10 @@
 import logging
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
-from src.scripts.service_handler import ServiceHandler
+from app.src.scripts.service_handler import ServiceHandler
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -16,6 +17,21 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",  # Enable /docs for Swagger UI
     redoc_url=None     # Disable /redoc (optional)
+)
+origins = [
+    "http://localhost",
+    "http://192.x.x.x",
+    "http://*:80",
+    "http://*:8000",
+    "http://*:443",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 # Disable the default root route
