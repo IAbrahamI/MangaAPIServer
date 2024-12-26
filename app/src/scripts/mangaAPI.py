@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from src.models.manga import Manga
+from app.src.models.manga import Manga
 
 class MangaManager:
     def __init__(self):
@@ -12,7 +12,7 @@ class MangaManager:
         """Search for the manga and extract its details."""
         try:
             # Format the search URL
-            processed_manga_name = manga_name.lower().replace(" ", "_")
+            processed_manga_name = manga_name.lower().replace(" ", "_").replace(",","")
             search_url = f"{self.base_url}{processed_manga_name}"
 
             # Fetch the search results page
@@ -46,6 +46,17 @@ class MangaManager:
             last_chapter = "No chapter found"
             last_chapter_url = "No chapter URL found"
             last_chapter_release_date = None
+            
+            # Extract image link
+            try:
+                image_container = details_soup.select_one("div.panel-story-info div.story-info-left span.info-image img")
+                if image_container and image_container.get('src'):
+                    image_link = image_container['src']
+                else:
+                    image_link = "No image link found"
+            except Exception as e:
+                print(f"Error parsing image link: {e}")
+                image_link = "No image link found"
 
             # Extract author
             try:
@@ -104,7 +115,6 @@ class MangaManager:
                 print(f"Error parsing rating: {e}")
                 rating = 0.0
 
-
             # Extract description
             try:
                 description_container = details_soup.find("div", class_="panel-story-info-description")
@@ -161,6 +171,7 @@ class MangaManager:
             return Manga(
                 url=href,
                 name=name,
+                image_link=image_link,
                 authors=authors,
                 status=status,
                 genres=genres,

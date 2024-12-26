@@ -1,6 +1,6 @@
-from src.models.manga import Manga
-from src.scripts.database_manager import DatabaseManager
-from src.scripts.mangaAPI import MangaManager
+from app.src.models.manga import Manga
+from app.src.scripts.database_manager import DatabaseManager
+from app.src.scripts.mangaAPI import MangaManager
 
 class ServiceHandler:
     def __init__(self):
