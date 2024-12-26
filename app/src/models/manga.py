@@ -5,6 +5,7 @@ from typing import List
 class Manga(BaseModel):
     url: str
     name: str
+    image_link : str
     authors: str
     status: str
     genres: List[str]

@@ -36,6 +36,7 @@ class MangaManager:
  
             # Initialize data variables
             name = manga_name
+            image_link = "No link found"
             authors = "No author found"
             status = "No status found"
             genres = []
