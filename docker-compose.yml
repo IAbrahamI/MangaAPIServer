@@ -10,3 +10,7 @@ services:
     volumes:
       - .:/app
     restart: unless-stopped
+networks:
+  nginxproxymanager_default:
+    external: true
+    name: nginxproxymanager_default
