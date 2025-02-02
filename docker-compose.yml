@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: mangaapi_server  # <--- Set a custom name here
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,6 +11,9 @@ services:
     volumes:
       - .:/app
     restart: unless-stopped
+    networks:
+      - nginxproxymanager_default  # <--- Ensure it belongs to the network
+
 networks:
   nginxproxymanager_default:
     external: true
