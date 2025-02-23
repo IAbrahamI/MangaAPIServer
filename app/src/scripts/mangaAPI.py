@@ -12,7 +12,7 @@ class MangaManager:
         """Search for the manga and extract its details."""
         try:
             # Format the search URL
-            processed_manga_name = manga_name.lower().replace(" ", "_").replace(",","")
+            processed_manga_name = manga_name.lower().replace(" ", "_").replace(",","").replace("'", "_")
             search_url = f"{self.base_url}{processed_manga_name}"
 
             # Fetch the search results page
