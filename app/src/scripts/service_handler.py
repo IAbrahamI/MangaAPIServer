@@ -1,6 +1,6 @@
 from app.src.models.manga import Manga
 from app.src.scripts.database_manager import DatabaseManager
-from app.src.scripts.mangaAPI import MangaManager
+from app.src.scripts.mangaAPI_Demonicscans import MangaManager
 
 class ServiceHandler:
     def __init__(self):
@@ -43,4 +43,3 @@ class ServiceHandler:
                 else:
                     results.append(f"No results found for {manga[2]}.")
         return results
-        
