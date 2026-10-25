@@ -39,6 +39,10 @@ app.add_middleware(
 def root():
     return JSONResponse(status_code=404, content={"message": "API Only"})
 
+@app.get("/health", include_in_schema=False)
+def health():
+    return {"status": "ok"}
+
 @app.get("/mangas")
 async def get_mangas():
     return service_handler.get_all_entries()
