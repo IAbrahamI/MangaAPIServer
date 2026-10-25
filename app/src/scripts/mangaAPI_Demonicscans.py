@@ -1,13 +1,22 @@
+import logging
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from app.src.models.manga import Manga
 from urllib.parse import quote
 
+logger = logging.getLogger(__name__)
+
+REQUEST_TIMEOUT_SECONDS = 15
+
 class MangaManager:
     def __init__(self):
         # Base URL for searching manga
         self.base_url = "https://demonicscans.org"
+        # Reuse connections across requests and parallel scrapes
+        self.session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_maxsize=4)
+        self.session.mount("https://", adapter)
         
     def get_manga(self, manga_name: str) -> Manga:
         """Search for the manga and extract its details."""
@@ -21,7 +30,7 @@ class MangaManager:
             search_url = f"{self.base_url}/manga/{processed_manga_name}"
             
             # Fetch the search results page
-            search_response = requests.get(search_url)
+            search_response = self.session.get(search_url, timeout=REQUEST_TIMEOUT_SECONDS)
             search_response.raise_for_status()
             search_soup = BeautifulSoup(search_response.text, 'html.parser')
             
@@ -45,7 +54,7 @@ class MangaManager:
                 else:
                     image_link = "No image link found"
             except Exception as e:
-                print(f"Error parsing image link: {e}")
+                logger.warning("Error parsing image link for %s: %s", manga_name, e)
                 image_link = "No image link found"
             
             # Extract author, rating, status, last update
@@ -69,7 +78,7 @@ class MangaManager:
                     if last_chapter_release_date_str else None
                 )
             except Exception as e:
-                print(f"Error parsing image link: {e}")
+                logger.warning("Error parsing manga info for %s: %s", manga_name, e)
                 authors = "No author found"
                 rating = 0.0
                 status = "No status found"
@@ -81,7 +90,7 @@ class MangaManager:
                 # Extract all <li> elements and store their text in a list
                 genres = [li.text.strip() for li in genres_container.find_all('li')] if genres_container else []
             except Exception as e:
-                print(f"Error parsing image link: {e}")
+                logger.warning("Error parsing genres for %s: %s", manga_name, e)
                 genres = []
                 
             # Extract description
@@ -92,7 +101,7 @@ class MangaManager:
                 else:
                     "No description found"
             except Exception as e:
-                print(f"Error parsing image link: {e}")
+                logger.warning("Error parsing description for %s: %s", manga_name, e)
                 description = "No description found"
                 
             # Extract last chapter data
@@ -111,7 +120,7 @@ class MangaManager:
                     last_chapter = "No last chapter found"
                     last_chapter_url = "No link to last chapter found"
             except Exception as e:
-                print(f"Error parsing image link: {e}")
+                logger.warning("Error parsing last chapter for %s: %s", manga_name, e)
                 last_chapter = "No last chapter found"
                 last_chapter_url = "No link to last chapter found"
             
@@ -132,5 +141,5 @@ class MangaManager:
             )
             
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.error("Failed to scrape %s: %s", manga_name, e)
             return None

@@ -1,4 +1,6 @@
+import asyncio
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -11,12 +13,33 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 service_handler = ServiceHandler()
 
+SCRAPE_INTERVAL_SECONDS = 3 * 60 * 60
+
+
+async def scheduled_scrape():
+    """Scrape all mangas at startup and then every SCRAPE_INTERVAL_SECONDS."""
+    while True:
+        try:
+            await asyncio.to_thread(service_handler.update_all_entries, "schedule")
+        except Exception:
+            logger.exception("Scheduled scrape failed")
+        await asyncio.sleep(SCRAPE_INTERVAL_SECONDS)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(scheduled_scrape())
+    yield
+    task.cancel()
+
+
 app = FastAPI(
     title="My Mangas API",
     description="API for all my favourite mangas created to be callable through an API",
     version="1.0.0",
     docs_url="/docs",  # Enable /docs for Swagger UI
-    redoc_url=None     # Disable /redoc (optional)
+    redoc_url=None,    # Disable /redoc (optional)
+    lifespan=lifespan
 )
 origins = [
     "http://localhost",
@@ -44,24 +67,23 @@ def health():
     return {"status": "ok"}
 
 @app.get("/mangas")
-async def get_mangas():
+def get_mangas():
     return service_handler.get_all_entries()
 
 
 @app.get("/mangas/{manga_name}")
-async def get_manga(manga_name: str):
+def get_manga(manga_name: str):
     return service_handler.retrieve_manga(manga_name)
 
 
 @app.post("/mangas/{manga_name}")
-async def add_manga(manga_name: str):
+def add_manga(manga_name: str):
     return service_handler.create_entry(manga_name)
 
 @app.delete("/mangas/{manga_name}")
-async def remove_manga(manga_name: str):
+def remove_manga(manga_name: str):
     return service_handler.remove_manga(manga_name)
 
-# To be defined
 @app.put("/mangas")
-async def update_mangas():
-    return service_handler.update_all_entries()
+def update_mangas():
+    return service_handler.update_all_entries("manual")
