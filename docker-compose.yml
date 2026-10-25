@@ -4,10 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - PYTHONPATH=/app
     volumes:
-      - .:/app
+      - ./app/databases:/app/app/databases
     restart: unless-stopped
     networks:
       - nginxproxymanager_default  # <--- Ensure it belongs to the network
